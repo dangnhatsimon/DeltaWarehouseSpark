@@ -9,14 +9,37 @@ x-spark-common: &spark-common
     - ./jobs:/opt/spark/jobs
     - ./datasets:/opt/spark/datasets
     - ./spark-events:/opt/spark/spark-events
-    - ./warehouse:/opt/spark/warehouse
+    - ./spark-warehouse:/opt/spark/spark-warehouse
+    - ./spark-checkpoint:/opt/spark/spark-checkpoint
+    - ./spark-state:/opt/spark/spark-state
   env_file:
     - .env.spark
   networks:
     - delta-warehouse
+  depends_on:
+    postgres:
+      condition: service_healthy
 
 
 services:
+  postgres:
+    image: postgres:13
+    container_name: postgres-metastore
+    environment:
+      POSTGRES_USER: metastore_db
+      POSTGRES_PASSWORD: metastore_db
+      POSTGRES_DB: metastore_db
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "metastore_db" ]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+    networks:
+      - delta-warehouse
+
   spark-master:
     container_name: delta-warehouse-spark-master
     <<: *spark-common
@@ -70,6 +93,7 @@ services:
 
 volumes:
   spark-events:
+  postgres-db-volume:
 
 networks:
   delta-warehouse:
