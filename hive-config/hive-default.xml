@@ -1,0 +1,67 @@
+<configuration>
+   <property>
+     <name>javax.jdo.option.ConnectionURL</name>
+     <value>jdbc:derby:;databaseName=/opt/spark/spark-warehouse/metastore_db;create=true</value>
+     <description>JDBC connect string for a JDBC metastore</description>
+   </property>
+   <property>
+     <name>javax.jdo.option.ConnectionDriverName</name>
+     <value>org.apache.derby.jdbc.EmbeddedDriver</value>
+     <description>Driver class name for a JDBC metastore</description>
+   </property>
+   <property>
+      <name>hive.metastore.warehouse.dir</name>
+      <value>/opt/spark/spark-warehouse/</value>
+      <description>location of default database for the warehouse</description>
+   </property>
+</configuration>
+
+
+<!--<configuration>-->
+<!--    <property>-->
+<!--        <name>javax.jdo.option.ConnectionURL</name>-->
+<!--        <value>jdbc:postgresql://postgres-metastore:5432/metastore_db</value>-->
+<!--    </property>-->
+<!--    <property>-->
+<!--        <name>javax.jdo.option.ConnectionDriverName</name>-->
+<!--        <value>org.postgresql.Driver</value>-->
+<!--    </property>-->
+<!--    <property>-->
+<!--        <name>javax.jdo.option.ConnectionUserName</name>-->
+<!--        <value>metastore_db</value>-->
+<!--    </property>-->
+<!--    <property>-->
+<!--        <name>javax.jdo.option.ConnectionPassword</name>-->
+<!--        <value>metastore_db</value>-->
+<!--    </property>-->
+<!--    <property>-->
+<!--        <name>datanucleus.schema.autoCreateAll</name>-->
+<!--        <value>true</value>-->
+<!--    </property>-->
+<!--    <property>-->
+<!--        <name>hive.metastore.warehouse.dir</name>-->
+<!--        <value>file:/opt/spark/warehouse</value>-->
+<!--    </property>-->
+<!--    <property>-->
+<!--        <name>hive.metastore.schema.verification</name>-->
+<!--        <value>false</value>-->
+<!--    </property>-->
+<!--    <property>-->
+<!--        <name>spark.sql.catalogImplementation</name>-->
+<!--        <value>hive</value>-->
+<!--    </property>-->
+<!--    <property>-->
+<!--        <name>hive.metastore.schema.verification.record.version</name>-->
+<!--        <value>true</value>-->
+<!--    </property>-->
+<!--    <property>-->
+<!--        <name>datanucleus.autoCreateSchema</name>-->
+<!--        <value>true</value>-->
+<!--    </property>-->
+<!--    <property>-->
+<!--        <name>datanucleus.fixedDatastore</name>-->
+<!--        <value>true</value>-->
+<!--    </property>-->
+<!--</configuration>-->
+
+

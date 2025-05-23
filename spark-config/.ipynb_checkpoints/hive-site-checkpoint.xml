@@ -57,7 +57,7 @@
       </property>
       <property>
           <name>hive.metastore.warehouse.dir</name>
-          <value>file:/opt/spark/warehouse</value>
+          <value>/opt/spark/warehouse</value>
       </property>
       <property>
           <name>hive.metastore.schema.verification</name>

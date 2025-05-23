@@ -17,12 +17,15 @@ RUN apt-get update && \
 ## Download spark and hadoop dependencies and install
 
 # ENV variables
+ENV HADOOP_VERSION=3.3.4
 ENV SPARK_VERSION=3.5.5
 ENV SCALA_VERSION=2.12
+ENV HIVE_VERSION=2.3.9
 
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV SPARK_HOME=${SPARK_HOME:-"/opt/spark"}
 ENV HADOOP_HOME=${HADOOP_HOME:-"/opt/hadoop"}
+ENV HIVE_HOME=${HIVE_HOME:-"/opt/hive"}
 
 ENV SPARK_MASTER_PORT=7077
 ENV SPARK_MASTER_HOST=delta-warehouse-spark-master
@@ -34,8 +37,14 @@ ENV PYSPARK_PYTHON=python3
 # Add iceberg spark runtime jar to IJava classpath
 ENV IJAVA_CLASSPATH=/opt/spark/jars/*
 
-RUN mkdir -p ${HADOOP_HOME} && mkdir -p ${SPARK_HOME}
+RUN mkdir -p ${HADOOP_HOME} && mkdir -p ${SPARK_HOME} && mkdir -p ${HIVE_HOME}
 WORKDIR ${SPARK_HOME}
+
+# Download hadoop
+RUN mkdir -p ${HADOOP_HOME} \
+    && curl https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz -o ${HADOOP_HOME}/hadoop-${HADOOP_VERSION}.tar.gz \
+    && tar xvzf ${HADOOP_HOME}/hadoop-${HADOOP_VERSION}.tar.gz --directory ${HADOOP_HOME} --strip-components 1 \
+    && rm -rf ${HADOOP_HOME}/hadoop-${HADOOP_VERSION}.tar.gz
 
 # Download spark
 # see resources: https://dlcdn.apache.org/spark/spark-3.5.5/
@@ -45,13 +54,24 @@ RUN mkdir -p ${SPARK_HOME} \
     && tar xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz --directory ${SPARK_HOME} --strip-components 1 \
     && rm -rf spark-${SPARK_VERSION}-bin-hadoop3.tgz
 
+# Download hive
+RUN mkdir -p ${HIVE_HOME} \
+    && curl https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz -o ${HIVE_HOME}/apache-hive-${HIVE_VERSION}-bin.tar.gz \
+    && tar xvzf ${HIVE_HOME}/apache-hive-${HIVE_VERSION}-bin.tar.gz --directory ${HIVE_HOME} --strip-components 1 \
+    && rm -rf ${HIVE_HOME}/apache-hive-${HIVE_VERSION}-bin.tar.gz
+
 # Add spark binaries to shell and enable execution
 RUN chmod u+x /opt/spark/sbin/* && \
-    chmod u+x /opt/spark/bin/*
-ENV PATH="$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin"
+    chmod u+x /opt/spark/bin/* && \
+    chmod u+x /opt/hadoop/sbin/* && \
+    chmod u+x /opt/hadoop/bin/* && \
+    chmod u+x /opt/hive/bin/*
+
+ENV PATH="$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$HIVE_HOME/bin"
 
 # Add a spark config for all nodes
-COPY config/* "$SPARK_HOME/conf/"
+COPY spark-config/* "$SPARK_HOME/conf/"
+COPY hive-config/* "$HIVE_HOME/conf/"
 
 
 FROM spark-base AS pyspark
@@ -113,7 +133,7 @@ ENV PYSPARK_DRIVER_PYTHON_OPTS="notebook --no-browser --allow-root --ip=0.0.0.0 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD [ "bash" ]
 
-RUN mkdir -p /opt/spark/warehouse/metastore_db && chmod -R 777 /opt/spark/warehouse
+RUN mkdir -p /opt/spark/spark-warehouse/metastore_db && chmod -R 777 /opt/spark/spark-warehouse
 
 # Now go to interactive shell mode
 # -$ docker exec -it spark-master /bin/bash
